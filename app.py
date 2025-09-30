@@ -48,7 +48,7 @@ def generate_dummy_data(num=100):
     for _ in range(num):
         merchant = np.random.choice(merchants)
         category = merchant_category_map[merchant]
-        amount = np.round(np.random.uniform(5, 54), 2)  # capped at £54
+        amount = np.round(np.random.uniform(5, 54), 2)  # cap at £54
 
         # Random day/time in September
         random_day = start_date + timedelta(days=np.random.randint(0, 30))
@@ -73,35 +73,50 @@ df_numeric = df.copy()
 df['Date'] = pd.to_datetime(df['Date']).dt.strftime("%d/%m/%Y %H:%M")
 df['Amount'] = df['Amount'].apply(lambda x: f"£{x:.2f}")
 
-st.subheader("September Spending Transactions")
-st.dataframe(df)
+# ---- Dashboard Layout ----
+st.subheader("September Spending Overview")
+col1, col2 = st.columns([1.2, 0.8])  # left wider, right smaller for more white space
 
-# ---- Plotly Visualisations ----
-st.subheader("Spending by Category")
-cat_summary = df_numeric.groupby('Category')['Amount'].sum().reset_index()
-fig_cat = px.bar(
-    cat_summary,
-    x="Category",
-    y="Amount",
-    text_auto='.2f',
-    title="Total Spending by Category (£)",
-    color="Category"
-)
-fig_cat.update_layout(showlegend=False, yaxis_title="Total Spending (£)")
-st.plotly_chart(fig_cat, use_container_width=True)
+with col1:
+    st.markdown("### Transactions")
+    st.dataframe(df, use_container_width=True)
 
-st.subheader("Spending Over Time")
-df_numeric['Day'] = pd.to_datetime(df_numeric['Date']).dt.day
-time_summary = df_numeric.groupby('Day')['Amount'].sum().reset_index()
-fig_time = px.line(
-    time_summary,
-    x="Day",
-    y="Amount",
-    markers=True,
-    title="Daily Spending in September (£)"
-)
-fig_time.update_layout(xaxis_title="Day in September", yaxis_title="Daily Spending (£)")
-st.plotly_chart(fig_time, use_container_width=True)
+with col2:
+    st.markdown("### Spending by Category")
+    cat_summary = df_numeric.groupby('Category')['Amount'].sum().reset_index()
+    fig_cat = px.bar(
+        cat_summary,
+        x="Category",
+        y="Amount",
+        text_auto='.2f',
+        color="Category",
+        title="Total Spending by Category (£)"
+    )
+    fig_cat.update_layout(
+        showlegend=False,
+        yaxis_title="Total Spending (£)",
+        height=300
+    )
+    st.plotly_chart(fig_cat, use_container_width=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)  # add white space
+
+    st.markdown("### Spending Over Time")
+    df_numeric['Day'] = pd.to_datetime(df_numeric['Date']).dt.day
+    time_summary = df_numeric.groupby('Day')['Amount'].sum().reset_index()
+    fig_time = px.line(
+        time_summary,
+        x="Day",
+        y="Amount",
+        markers=True,
+        title="Daily Spending in September (£)"
+    )
+    fig_time.update_layout(
+        xaxis_title="Day in September",
+        yaxis_title="Daily Spending (£)",
+        height=300
+    )
+    st.plotly_chart(fig_time, use_container_width=True)
 
 # ---- AI-Powered Summary ----
 def generate_summary(df):
