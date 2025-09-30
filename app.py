@@ -7,15 +7,15 @@ from openai import OpenAI
 
 st.title("AI Spending Analyser")
 
-# Initialize OpenAI client
+# Initialize OpenAI client 
 client = OpenAI(api_key=st.secrets["openai_api_key"])
 
-# Step 1: Generate synthetic debit card transactions
+# here i have generated fake card transactions for September
 @st.cache_data
 def generate_dummy_data(num=100):
     np.random.seed(42)
 
-    # Merchant → Category mapping
+    # Merchant and it's Category mapping
     merchant_category_map = {
         'Tesco': 'Groceries',
         'Starbucks': 'Restaurants',
@@ -35,7 +35,7 @@ def generate_dummy_data(num=100):
 
     merchants = list(merchant_category_map.keys())
 
-    # September date range (fixed year to current year)
+    # September date range (30 days) to show a variety of spending patterns of a user in one month
     year = datetime.today().year
     start_date = datetime(year, 9, 1)
     end_date = datetime(year, 9, 30)
@@ -49,7 +49,7 @@ def generate_dummy_data(num=100):
         # Pick a random date in September
         random_day = start_date + timedelta(days=np.random.randint(0, 30))
 
-        # Restrict time to between 08:00 and 22:00
+        # Restrict time to between 08:00 and 22:00 to mimic typical spending times
         random_hour = np.random.randint(8, 22)
         random_minute = np.random.randint(0, 60)
         date = random_day + timedelta(
@@ -80,25 +80,35 @@ df['Amount'] = df['Amount'].apply(lambda x: f"£{x:.2f}")
 st.subheader("September Spending Transactions")
 st.dataframe(df)
 
-# Step 2: Visualisations (use numeric copy)
+import plotly.express as px
+
+# Step 2: Visualisations with Plotly
 st.subheader("Spending by Category")
-cat_summary = df_numeric.groupby('Category')['Amount'].sum()
-fig, ax = plt.subplots()
-cat_summary.plot(kind='bar', ax=ax)
-ax.set_ylabel("Total Spending (£)")
-st.pyplot(fig)
+cat_summary = df_numeric.groupby('Category')['Amount'].sum().reset_index()
+fig_cat = px.bar(
+    cat_summary,
+    x="Category",
+    y="Amount",
+    text_auto='.2f',
+    title="Total Spending by Category (£)",
+    color="Category"
+)
+fig_cat.update_layout(showlegend=False, yaxis_title="Total Spending (£)")
+st.plotly_chart(fig_cat, use_container_width=True)
 
 st.subheader("Spending Over Time")
-
 df_numeric['Day'] = pd.to_datetime(df_numeric['Date']).dt.day
-time_summary = df_numeric.groupby('Day')['Amount'].sum()
+time_summary = df_numeric.groupby('Day')['Amount'].sum().reset_index()
+fig_time = px.line(
+    time_summary,
+    x="Day",
+    y="Amount",
+    markers=True,
+    title="Daily Spending in September (£)"
+)
+fig_time.update_layout(xaxis_title="Day in September", yaxis_title="Daily Spending (£)")
+st.plotly_chart(fig_time, use_container_width=True)
 
-# Plot
-fig2, ax2 = plt.subplots()
-time_summary.plot(kind='line', ax=ax2, marker='o')
-ax2.set_xlabel("Day in September")
-ax2.set_ylabel("Daily Spending (£)")
-st.pyplot(fig2)
 
 
 # Step 3: AI-Powered Summary with OpenAI
@@ -118,7 +128,7 @@ def generate_summary(df):
     "Highlight the biggest categories, point out any patterns (like weekends or frequent merchants), "
     "and mention a few specific merchants by name."
     "Do not repeat the numbers exactly — explain insights naturally in 2–3 sentences.\n\n"
-    f"Customer spending data:\n{input_text}"
+    f"Customer spending data:\n{input_text}" 
     )
 
     response = client.chat.completions.create(
