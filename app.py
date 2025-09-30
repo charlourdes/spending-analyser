@@ -5,151 +5,121 @@ from datetime import datetime, timedelta
 from openai import OpenAI
 import plotly.express as px
 
-st.set_page_config(
-    page_title="AI Spending Analyser",
-    page_icon="💳",
-    layout="wide"
-)
-
+st.set_page_config(page_title="AI Spending Analyser", page_icon="💳", layout="wide")
 st.title("AI Spending Analyser")
 
-# Initialize OpenAI client 
+# Initialize OpenAI client
 client = OpenAI(api_key=st.secrets["openai_api_key"])
 
-# Generate fake card transactions for September
+# -------------------------
+# Data generator
+# -------------------------
 @st.cache_data
-def generate_dummy_data(num=100):
+def generate_dummy_data(num=50):
     np.random.seed(42)
-
     merchant_category_map = {
-        'Tesco': 'Groceries',
-        'Starbucks': 'Restaurants',
-        'Uber': 'Transport',
-        'Vue Cinema': 'Entertainment',
-        'H&M': 'Clothing',
-        'Shell': 'Transport',
-        'M&S': 'Groceries',
-        'Costco': 'Shopping',
-        'Amazon': 'Shopping',
-        'Pizza Hut': 'Restaurants',
-        'Arcade': 'Entertainment',
-        'IKEA': 'Shopping',
-        'Boots': 'Health',
-        'Holland & Barrett': 'Health',
+        'Tesco': 'Groceries', 'Starbucks': 'Restaurants', 'Uber': 'Transport',
+        'Vue Cinema': 'Entertainment', 'H&M': 'Clothing', 'Shell': 'Transport',
+        'M&S': 'Groceries', 'Costco': 'Shopping', 'Amazon': 'Shopping',
+        'Pizza Hut': 'Restaurants', 'Arcade': 'Entertainment', 'IKEA': 'Shopping',
+        'Boots': 'Health', 'Holland & Barrett': 'Health',
     }
-
     merchants = list(merchant_category_map.keys())
-
-    # September date range
     year = datetime.today().year
-    start_date = datetime(year, 9, 1)
+    start = datetime(year, 9, 1)
 
-    data = []
+    rows = []
     for _ in range(num):
         merchant = np.random.choice(merchants)
         category = merchant_category_map[merchant]
-        amount = np.round(np.random.uniform(5, 54), 2)  # cap at £54
+        amount = np.round(np.random.uniform(5, 54), 2)
+        day = start + timedelta(days=np.random.randint(0, 30))
+        hour = np.random.randint(8, 22)
+        minute = np.random.randint(0, 60)
+        dt = day + timedelta(hours=hour, minutes=minute)
+        rows.append({"Date": dt, "Category": category, "Amount": amount, "Merchant": merchant})
+    return pd.DataFrame(rows)
 
-        # Random day/time in September
-        random_day = start_date + timedelta(days=np.random.randint(0, 30))
-        random_hour = np.random.randint(8, 22)
-        random_minute = np.random.randint(0, 60)
-        date = random_day + timedelta(hours=random_hour, minutes=random_minute)
-
-        data.append({
-            'Date': date,
-            'Category': category,
-            'Amount': amount,
-            'Merchant': merchant
-        })
-
-    return pd.DataFrame(data)
-
-# Load transactions
-df = generate_dummy_data(50).sort_values('Date')
+df = generate_dummy_data(50).sort_values("Date")
 df_numeric = df.copy()
 
-# Format Date + Amount for display
-df['Date'] = pd.to_datetime(df['Date']).dt.strftime("%d/%m/%Y %H:%M")
-df['Amount'] = df['Amount'].apply(lambda x: f"£{x:.2f}")
+# Display formatting for table
+df_display = df.copy()
+df_display["Date"] = pd.to_datetime(df_display["Date"]).dt.strftime("%d/%m/%Y %H:%M")
+df_display["Amount"] = df_display["Amount"].apply(lambda x: f"£{x:.2f}")
 
-# ---- Dashboard Layout ----
-st.subheader("September Spending Overview")
-col1, col2 = st.columns([1.2, 0.8])  # left wider, right smaller for more white space
+# -------------------------
+# Helpers: card container
+# -------------------------
+def card_container(title: str, height: int = 420):
+    return st.container(border=True, height=height)
 
+# -------------------------
+# Create Plotly figures
+# -------------------------
+cat_summary = df_numeric.groupby("Category")["Amount"].sum().reset_index()
+fig_cat = px.bar(cat_summary, x="Category", y="Amount", text_auto=".2f", color="Category")
+fig_cat.update_layout(showlegend=False, yaxis_title="Total Spending (£)", height=280,
+                      margin=dict(t=10, l=40, r=10, b=40))
+
+df_numeric["Day"] = pd.to_datetime(df_numeric["Date"]).dt.day
+time_summary = df_numeric.groupby("Day")["Amount"].sum().reset_index()
+fig_time = px.line(time_summary, x="Day", y="Amount", markers=True)
+fig_time.update_layout(xaxis_title="Day in September", yaxis_title="Daily Spending (£)", height=280,
+                       margin=dict(t=10, l=40, r=10, b=40))
+
+# -------------------------
+# Layout (2x2 grid)
+# -------------------------
+col1, col2 = st.columns(2)
+
+# Top-left: Transactions table card
 with col1:
-    st.markdown("### Transactions")
-    st.dataframe(df, use_container_width=True)
+    with card_container("September Spending Transactions"):
+        st.dataframe(df_display, use_container_width=True, height=300)
 
+# Top-right: Category chart card
 with col2:
-    st.markdown("### Spending by Category")
-    cat_summary = df_numeric.groupby('Category')['Amount'].sum().reset_index()
-    fig_cat = px.bar(
-        cat_summary,
-        x="Category",
-        y="Amount",
-        text_auto='.2f',
-        color="Category",
-        title="Total Spending by Category (£)"
-    )
-    fig_cat.update_layout(
-        showlegend=False,
-        yaxis_title="Total Spending (£)",
-        height=300
-    )
-    st.plotly_chart(fig_cat, use_container_width=True)
+    with card_container("Spending by Category"):
+        st.plotly_chart(fig_cat, use_container_width=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)  # add white space
+# Bottom-left: Time chart card
+col3, col4 = st.columns(2)
+with col3:
+    with card_container("Spending Over Time"):
+        st.plotly_chart(fig_time, use_container_width=True)
 
-    st.markdown("### Spending Over Time")
-    df_numeric['Day'] = pd.to_datetime(df_numeric['Date']).dt.day
-    time_summary = df_numeric.groupby('Day')['Amount'].sum().reset_index()
-    fig_time = px.line(
-        time_summary,
-        x="Day",
-        y="Amount",
-        markers=True,
-        title="Daily Spending in September (£)"
-    )
-    fig_time.update_layout(
-        xaxis_title="Day in September",
-        yaxis_title="Daily Spending (£)",
-        height=300
-    )
-    st.plotly_chart(fig_time, use_container_width=True)
+# Bottom-right: AI summary card
+with col4:
+    with card_container("AI Summary of Your Spending"):
+        if "summary_text" not in st.session_state:
+            st.session_state["summary_text"] = None
 
-# ---- AI-Powered Summary ----
-def generate_summary(df):
-    cat_totals = df.groupby('Category')['Amount'].sum().sort_values(ascending=False)
-    top_merchants = df.groupby('Merchant')['Amount'].sum().sort_values(ascending=False).head(3)
+        if st.button("Generate Spending Summary", key="gen_summary"):
+            cat_totals = df_numeric.groupby("Category")["Amount"].sum().sort_values(ascending=False)
+            top_merchants = df_numeric.groupby("Merchant")["Amount"].sum().sort_values(ascending=False).head(3)
+            input_text = (
+                f"Over the past {len(df_numeric.head(20))} transactions, "
+                f"the highest spending was on {cat_totals.index[0]} (£{cat_totals.iloc[0]:.2f}). "
+                f"Other major areas include {cat_totals.index[1]} and {cat_totals.index[2]}. "
+                f"The most frequent merchants were {', '.join(top_merchants.index)}."
+            )
+            prompt = (
+                "You are a friendly financial assistant. Write a short, conversational summary of the customer's September spending. "
+                "Highlight the biggest categories, point out any patterns (like weekends or frequent merchants), "
+                "and mention a few specific merchants by name. Do not repeat the numbers exactly — explain insights naturally in 2–3 sentences.\n\n"
+                f"Customer spending data:\n{input_text}"
+            )
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "You are a helpful financial assistant."},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            st.session_state["summary_text"] = response.choices[0].message.content.strip()
 
-    input_text = (
-        f"Over the past {len(df)} transactions, "
-        f"the highest spending was on {cat_totals.index[0]} (£{cat_totals.iloc[0]:.2f}). "
-        f"Other major areas include {cat_totals.index[1]} and {cat_totals.index[2]}. "
-        f"The most frequent merchants were {', '.join(top_merchants.index)}."
-    )
-
-    prompt = (
-        "You are a friendly financial assistant. Write a short, conversational summary of the customer's September spending. "
-        "Highlight the biggest categories, point out any patterns (like weekends or frequent merchants), "
-        "and mention a few specific merchants by name. "
-        "Do not repeat the numbers exactly — explain insights naturally in 2–3 sentences.\n\n"
-        f"Customer spending data:\n{input_text}"
-    )
-
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "You are a helpful financial assistant."},
-            {"role": "user", "content": prompt}
-        ]
-    )
-    return response.choices[0].message.content.strip()
-
-st.subheader("AI Summary of Your Spending")
-if st.button("Generate Spending Summary"):
-    with st.spinner("Thinking..."):
-        summary = generate_summary(df_numeric.head(20))
-        st.success("Summary ready!")
-        st.markdown(summary)
+        if st.session_state["summary_text"]:
+            st.markdown(st.session_state["summary_text"])
+        else:
+            st.markdown("<p style='color:#666'>Click the button to generate an AI summary of the displayed transactions.</p>", unsafe_allow_html=True)
