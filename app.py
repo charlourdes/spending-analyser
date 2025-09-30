@@ -111,7 +111,7 @@ st.plotly_chart(fig_time, use_container_width=True)
 
 
 
-# Step 3: AI-Powered Summary with OpenAI
+# Step 3: AI-Powered Summary with OpenAI API
 def generate_summary(df):
     cat_totals = df.groupby('Category')['Amount'].sum().sort_values(ascending=False)
     top_merchants = df.groupby('Merchant')['Amount'].sum().sort_values(ascending=False).head(3)
