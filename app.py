@@ -30,8 +30,7 @@ client = OpenAI(api_key=st.secrets["openai_api_key"])
 # -------------------------
 @st.cache_data
 def generate_dummy_data(num=50, month=9):
-    # Different random seed per month so data differs
-    np.random.seed(40 + month)
+    np.random.seed(40 + month)  # Different random seed per month
 
     merchant_category_map = {
         'Tesco': 'Groceries', 'Starbucks': 'Restaurants', 'Uber': 'Transport',
@@ -49,7 +48,6 @@ def generate_dummy_data(num=50, month=9):
         merchant = np.random.choice(merchants)
         category = merchant_category_map[merchant]
 
-        # Give August a slightly higher spending range
         if month == 8:
             amount = np.round(np.random.uniform(10, 75), 2)
         else:
@@ -64,15 +62,11 @@ def generate_dummy_data(num=50, month=9):
 
 
 # -------------------------
-# Month selector (Dropdown in 1/3 width)
+# Month selector
 # -------------------------
-col_month, _, _ = st.columns([1, 2, 2])  # 1/3 width for dropdown, rest empty
+col_month, _, _ = st.columns([1, 2, 2])
 with col_month:
-    month_choice = st.selectbox(
-        "Select Month",
-        ["September", "August"],  # default = September
-        index=0
-    )
+    month_choice = st.selectbox("Select Month", ["September", "August"], index=0)
 
 if month_choice == "September":
     df = generate_dummy_data(50, month=9).sort_values("Date")
@@ -84,19 +78,10 @@ else:
 # -------------------------
 # Copies for processing + display
 # -------------------------
-df_numeric = df.copy()  # numeric calculations
-df_display = df.copy()  # pretty table
+df_numeric = df.copy()
+df_display = df.copy()
 df_display["Date"] = pd.to_datetime(df_display["Date"]).dt.strftime("%d/%m/%Y %H:%M")
 df_display["Amount"] = df_display["Amount"].apply(lambda x: f"£{x:.2f}")
-
-# -------------------------
-# Helpers: card container WITH TITLE
-# -------------------------
-def card_container(title: str, height: int = 420):
-    container = st.container(border=True, height=height)
-    with container:
-        st.subheader(title)
-    return container
 
 # -------------------------
 # KPI Cards (Top row)
@@ -137,30 +122,27 @@ fig_time.update_layout(xaxis_title=f"Day in {month_name}", yaxis_title="Daily Sp
                        margin=dict(t=10, l=40, r=10, b=40))
 
 # -------------------------
-# Layout (2x2 grid)
+# Layout (2x2 grid, swapped order)
 # -------------------------
 col1, col2 = st.columns(2)
 
 with col1:
-    c1 = card_container(f"Your {month_name} Transactions")
+    c1 = st.container(border=True, height=420)
     with c1:
-        st.dataframe(df_display, use_container_width=True, height=300)
+        # Title with SVG icon
+        st.markdown(
+            f"""
+            <h3 style="display:flex; align-items:center; gap:8px; margin:0;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 30 30" fill="currentColor">
+                    <path d="M14.217,19.707l-1.112,2.547c-0.427,0.979-1.782,0.979-2.21,0l-1.112-2.547c-0.99-2.267-2.771-4.071-4.993-5.057 L1.73,13.292c-0.973-0.432-0.973-1.848,0-2.28l2.965-1.316C6.974,8.684,8.787,6.813,9.76,4.47l1.126-2.714 c0.418-1.007,1.81-1.007,2.228,0L14.24,4.47c0.973,2.344,2.786,4.215,5.065,5.226l2.965,1.316c0.973,0.432,0.973,1.848,0,2.28 l-3.061,1.359C16.988,15.637,15.206,17.441,14.217,19.707z"></path>
+                    <path d="M24.481,27.796l-0.339,0.777c-0.248,0.569-1.036,0.569-1.284,0l-0.339-0.777c-0.604-1.385-1.693-2.488-3.051-3.092 l-1.044-0.464c-0.565-0.251-0.565-1.072,0-1.323l0.986-0.438c1.393-0.619,2.501-1.763,3.095-3.195l0.348-0.84 c0.243-0.585,1.052-0.585,1.294,0l0.348,0.84c0.594,1.432,1.702,2.576,3.095,3.195l0.986,0.438c0.565,0.251,0.565,1.072,0,1.323 l-1.044,0.464C26.174,25.308,25.085,26.411,24.481,27.796z"></path>
+                </svg>
+                Your AI Spending Summary ({month_name})
+            </h3>
+            """,
+            unsafe_allow_html=True
+        )
 
-with col2:
-    c2 = card_container("Spending by Category")
-    with c2:
-        st.plotly_chart(fig_cat, use_container_width=True)
-
-col3, col4 = st.columns(2)
-
-with col3:
-    c3 = card_container(f"Spending over {month_name}")
-    with c3:
-        st.plotly_chart(fig_time, use_container_width=True)
-
-with col4:
-    c4 = card_container(f"Your AI Spending Summary ({month_name})")
-    with c4:
         if "summary_text" not in st.session_state:
             st.session_state["summary_text"] = {}
 
@@ -188,7 +170,27 @@ with col4:
             )
             st.session_state["summary_text"][month_name] = response.choices[0].message.content.strip()
 
+        # Only show text if it exists, no grey placeholder
         if month_name in st.session_state["summary_text"]:
             st.markdown(st.session_state["summary_text"][month_name])
-        else:
-            st.markdown(f"<p style='color:#666'>Click the button to generate an AI summary of {month_name} transactions.</p>", unsafe_allow_html=True)
+
+
+with col2:
+    c2 = st.container(border=True, height=420)
+    with c2:
+        st.subheader(f"Your {month_name} Transactions")
+        st.dataframe(df_display, use_container_width=True, height=300)
+
+col3, col4 = st.columns(2)
+
+with col3:
+    c3 = st.container(border=True, height=420)
+    with c3:
+        st.subheader("Spending by Category")
+        st.plotly_chart(fig_cat, use_container_width=True)
+
+with col4:
+    c4 = st.container(border=True, height=420)
+    with c4:
+        st.subheader(f"Daily {month_name} Spending")
+        st.plotly_chart(fig_time, use_container_width=True)
