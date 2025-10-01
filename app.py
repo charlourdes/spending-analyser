@@ -49,10 +49,14 @@ df_display["Date"] = pd.to_datetime(df_display["Date"]).dt.strftime("%d/%m/%Y %H
 df_display["Amount"] = df_display["Amount"].apply(lambda x: f"£{x:.2f}")
 
 # -------------------------
-# Helpers: card container
+# Helpers: card container WITH TITLE
 # -------------------------
 def card_container(title: str, height: int = 420):
-    return st.container(border=True, height=height)
+    """Reusable card with a border and section title"""
+    container = st.container(border=True, height=height)
+    with container:
+        st.subheader(title)
+    return container
 
 # -------------------------
 # Create Plotly figures
@@ -75,23 +79,27 @@ col1, col2 = st.columns(2)
 
 # Top-left: Transactions table card
 with col1:
-    with card_container("September Spending Transactions"):
+    c1 = card_container("September Spending Transactions")
+    with c1:
         st.dataframe(df_display, use_container_width=True, height=300)
 
 # Top-right: Category chart card
 with col2:
-    with card_container("Spending by Category"):
+    c2 = card_container("Spending by Category")
+    with c2:
         st.plotly_chart(fig_cat, use_container_width=True)
 
 # Bottom-left: Time chart card
 col3, col4 = st.columns(2)
 with col3:
-    with card_container("Spending Over Time"):
+    c3 = card_container("Spending Over Time")
+    with c3:
         st.plotly_chart(fig_time, use_container_width=True)
 
 # Bottom-right: AI summary card
 with col4:
-    with card_container("AI Summary of Your Spending"):
+    c4 = card_container("AI Summary of Your Spending")
+    with c4:
         if "summary_text" not in st.session_state:
             st.session_state["summary_text"] = None
 
