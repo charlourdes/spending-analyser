@@ -6,7 +6,20 @@ from openai import OpenAI
 import plotly.express as px
 
 st.set_page_config(page_title="AI Spending Analyser", page_icon="💳", layout="wide")
-st.title("AI Spending Analyser")
+st.title("Your spending analysis")
+
+st.markdown(
+    """
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+    html, body, [class*="css"]  {
+        font-family: 'Roboto', sans-serif !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 # Initialize OpenAI client
 client = OpenAI(api_key=st.secrets["openai_api_key"])
@@ -48,6 +61,32 @@ df_display = df.copy()
 df_display["Date"] = pd.to_datetime(df_display["Date"]).dt.strftime("%d/%m/%Y %H:%M")
 df_display["Amount"] = df_display["Amount"].apply(lambda x: f"£{x:.2f}")
 
+
+# -------------------------
+# KPI summary cards (top row)
+# -------------------------
+total_spending = df_numeric["Amount"].sum()
+num_transactions = len(df_numeric)
+avg_transaction = df_numeric["Amount"].mean()
+
+kpi_col1, kpi_col2, kpi_col3 = st.columns(3)
+
+with kpi_col1:
+    with st.container(border=True):
+        st.subheader("💰 Total Spending")
+        st.markdown(f"<h3 style='margin:0; font-family:Roboto'>£{total_spending:,.2f}</h3>", unsafe_allow_html=True)
+
+with kpi_col2:
+    with st.container(border=True):
+        st.subheader("🧾 Transactions")
+        st.markdown(f"<h3 style='margin:0; font-family:Roboto'>{num_transactions}</h3>", unsafe_allow_html=True)
+
+with kpi_col3:
+    with st.container(border=True):
+        st.subheader("📊 Avg Transaction")
+        st.markdown(f"<h3 style='margin:0; font-family:Roboto'>£{avg_transaction:,.2f}</h3>", unsafe_allow_html=True)
+
+
 # -------------------------
 # Helpers: card container WITH TITLE
 # -------------------------
@@ -79,7 +118,7 @@ col1, col2 = st.columns(2)
 
 # Top-left: Transactions table card
 with col1:
-    c1 = card_container("September Spending Transactions")
+    c1 = card_container("Your September Transactions")
     with c1:
         st.dataframe(df_display, use_container_width=True, height=300)
 
@@ -92,13 +131,13 @@ with col2:
 # Bottom-left: Time chart card
 col3, col4 = st.columns(2)
 with col3:
-    c3 = card_container("Spending Over Time")
+    c3 = card_container("Spending over September")
     with c3:
         st.plotly_chart(fig_time, use_container_width=True)
 
 # Bottom-right: AI summary card
 with col4:
-    c4 = card_container("AI Summary of Your Spending")
+    c4 = card_container("Your AI Spending Summary")
     with c4:
         if "summary_text" not in st.session_state:
             st.session_state["summary_text"] = None
