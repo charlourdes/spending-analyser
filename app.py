@@ -84,18 +84,59 @@ df_display["Date"] = pd.to_datetime(df_display["Date"]).dt.strftime("%d/%m/%Y %H
 df_display["Amount"] = df_display["Amount"].apply(lambda x: f"£{x:.2f}")
 
 # -------------------------
+# Calculate spending deltas
+# -------------------------
+df_aug = generate_dummy_data(50, month=8)
+df_sep = generate_dummy_data(50, month=9)
+
+aug_total_spending = df_aug["Amount"].sum()
+sep_total_spending = df_sep["Amount"].sum()
+
+if month_choice == "September":
+    total_spending = sep_total_spending
+    total_transactions = len(df_sep)
+    avg_transaction = df_sep["Amount"].mean()
+    delta_spending = sep_total_spending - aug_total_spending
+
+    # ✅ Spending down = green downward arrow, Spending up = red upward arrow
+    delta_color = "inverse" if delta_spending < 0 else "normal"
+else:
+    total_spending = aug_total_spending
+    total_transactions = len(df_aug)
+    avg_transaction = df_aug["Amount"].mean()
+    delta_spending = None
+    delta_color = None
+
+
+# -------------------------
 # KPI Cards (Top row)
 # -------------------------
-total_spending = df_numeric["Amount"].sum()
-total_transactions = len(df_numeric)
-avg_transaction = df_numeric["Amount"].mean()
-
 kpi1, kpi2, kpi3 = st.columns(3)
 
 with kpi1:
     k1 = st.container(border=True, height=120)
     with k1:
-        st.metric(f"Total Spending ({month_name})", f"£{total_spending:.2f}")
+        if month_choice == "September":
+            # Spending down = good, show positive saving
+            if delta_spending < 0:
+                delta_label = f"Saved £{abs(delta_spending):.2f}"
+                delta_color = "normal"   # negative delta = green DOWN arrow
+            else:
+                delta_label = f"Extra £{delta_spending:.2f}"
+                delta_color = "inverse"  # positive delta = red UP arrow
+
+            st.metric(
+                f"Total Spending ({month_name})",
+                f"£{total_spending:.2f}",
+                delta=delta_label,
+                delta_color=delta_color
+            )
+        else:
+            st.metric(
+                f"Total Spending ({month_name})",
+                f"£{total_spending:.2f}"
+            )
+
 
 with kpi2:
     k2 = st.container(border=True, height=120)
