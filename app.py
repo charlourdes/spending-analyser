@@ -116,26 +116,32 @@ kpi1, kpi2, kpi3 = st.columns(3)
 with kpi1:
     k1 = st.container(border=True, height=120)
     with k1:
-        if month_choice == "September":
-            # Spending down = good, show positive saving
-            if delta_spending < 0:
-                delta_label = f"Saved £{abs(delta_spending):.2f}"
-                delta_color = "normal"   # negative delta = green DOWN arrow
-            else:
-                delta_label = f"Extra £{delta_spending:.2f}"
-                delta_color = "inverse"  # positive delta = red UP arrow
+        col_left, col_right = st.columns([3, 1])  # ratio: more space for metric
 
-            st.metric(
-                f"Total Spending ({month_name})",
-                f"£{total_spending:.2f}",
-                delta=delta_label,
-                delta_color=delta_color
-            )
-        else:
-            st.metric(
-                f"Total Spending ({month_name})",
-                f"£{total_spending:.2f}"
-            )
+        with col_left:
+            if month_choice == "September":
+                percent_change = ((sep_total_spending - aug_total_spending) / aug_total_spending) * 100
+                st.metric(
+                    f"Total Spending ({month_name})",
+                    f"£{total_spending:.2f}",
+                    delta=f"{percent_change:.1f}%",
+                    delta_color="inverse"
+                )
+            else:
+                st.metric(
+                    f"Total Spending ({month_name})",
+                    f"£{total_spending:.2f}"
+                )
+
+        with col_right:
+            if month_choice == "September":
+                if percent_change < 0:
+                    st.caption("✅ Spending down")
+                else:
+                    st.caption("⚠️ Spending up")
+
+
+
 
 
 with kpi2:
