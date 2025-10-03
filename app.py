@@ -6,24 +6,6 @@ from openai import OpenAI
 import plotly.express as px
 
 st.set_page_config(page_title="AI Spending Analyser", page_icon="💳", layout="wide")
-st.title("Your spending analysis dashboard ")
-
-st.markdown(
-    """
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
-
-    html, body, [class*="css"]  {
-        font-family: 'Roboto', sans-serif !important;
-        background-color: #F0F4F8;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# Initialize OpenAI client
-client = OpenAI(api_key=st.secrets["openai_api_key"])
 
 # -------------------------
 # Data generator
@@ -62,18 +44,30 @@ def generate_dummy_data(num=50, month=9):
 
 
 # -------------------------
-# Month selector
+# Title first
 # -------------------------
-col_month, _, _ = st.columns([1, 2, 2])
-with col_month:
-    month_choice = st.selectbox("Select Month", ["September", "August"], index=0)
+st.title("Your Spending dashboard")
 
+# -------------------------
+# Month selector BELOW title (restricted width)
+# -------------------------
+col_month, _ = st.columns([1, 3])  # dropdown takes 1/4 page width
+with col_month:
+    month_choice = st.selectbox("Select Month", ["September", "August"], index=0, label_visibility="collapsed")
+
+# -------------------------
+# Apply month selection
+# -------------------------
 if month_choice == "September":
     df = generate_dummy_data(50, month=9).sort_values("Date")
     month_name = "September"
 else:
     df = generate_dummy_data(50, month=8).sort_values("Date")
     month_name = "August"
+
+# ✅ Dynamic subtitle update
+st.subheader(f"{month_name} Spending analysis")
+
 
 # -------------------------
 # Copies for processing + display
@@ -97,16 +91,15 @@ if month_choice == "September":
     total_transactions = len(df_sep)
     avg_transaction = df_sep["Amount"].mean()
     delta_spending = sep_total_spending - aug_total_spending
-
-    # ✅ Spending down = green downward arrow, Spending up = red upward arrow
+    percent_change = ((sep_total_spending - aug_total_spending) / aug_total_spending) * 100
     delta_color = "inverse" if delta_spending < 0 else "normal"
 else:
     total_spending = aug_total_spending
     total_transactions = len(df_aug)
     avg_transaction = df_aug["Amount"].mean()
     delta_spending = None
+    percent_change = None
     delta_color = None
-
 
 # -------------------------
 # KPI Cards (Top row)
@@ -116,33 +109,28 @@ kpi1, kpi2, kpi3 = st.columns(3)
 with kpi1:
     k1 = st.container(border=True, height=120)
     with k1:
-        col_left, col_right = st.columns([3, 1])  # ratio: more space for metric
+        if month_choice == "September":
+            col_left, col_right = st.columns([3, 1])
 
-        with col_left:
-            if month_choice == "September":
-                percent_change = ((sep_total_spending - aug_total_spending) / aug_total_spending) * 100
+            with col_left:
                 st.metric(
                     f"Total Spending ({month_name})",
                     f"£{total_spending:.2f}",
                     delta=f"{percent_change:.1f}%",
-                    delta_color="inverse"
-                )
-            else:
-                st.metric(
-                    f"Total Spending ({month_name})",
-                    f"£{total_spending:.2f}"
+                    delta_color=delta_color
                 )
 
-        with col_right:
-            if month_choice == "September":
+            with col_right:
                 if percent_change < 0:
-                    st.caption("✅ Spending down")
-                else:
-                    st.caption("⚠️ Spending up")
+                    st.caption(":material/trending_down: Spending down from last month")
+                elif percent_change > 0:
+                    st.caption(":material/trending_up: Spending up from last month")
 
-
-
-
+        else:
+            st.metric(
+                f"Total Spending ({month_name})",
+                f"£{total_spending:.2f}"
+            )
 
 with kpi2:
     k2 = st.container(border=True, height=120)
@@ -181,22 +169,27 @@ with col1:
         if "summary_text" not in st.session_state:
             st.session_state["summary_text"] = {}
 
+        summary_box = st.empty()
+
         if st.button(f"Generate Spending Summary", key=f"gen_summary_{month_name}"):
             cat_totals = df_numeric.groupby("Category")["Amount"].sum().sort_values(ascending=False)
             top_merchants = df_numeric.groupby("Merchant")["Amount"].sum().sort_values(ascending=False).head(3)
+
             input_text = (
                 f"Over the past {len(df_numeric)} transactions, "
                 f"the highest spending was on {cat_totals.index[0]} (£{cat_totals.iloc[0]:.2f}). "
                 f"Other major areas include {cat_totals.index[1]} and {cat_totals.index[2]}. "
                 f"The most frequent merchants were {', '.join(top_merchants.index)}."
             )
+
             prompt = (
                 f"You are a friendly financial assistant. Write a short, conversational summary of the customer's {month_name} spending. "
-                "Highlight the biggest categories, point out any patterns (like weekends or frequent merchants), "
+                "Highlight the biggest categories, point out any patterns, "
                 "and mention a few specific merchants by name. Do not repeat the numbers exactly — explain insights naturally in 2–3 sentences.\n\n"
                 f"Customer spending data:\n{input_text}"
             )
-            response = client.chat.completions.create(
+
+            response = OpenAI(api_key=st.secrets["openai_api_key"]).chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": "You are a helpful financial assistant."},
@@ -206,8 +199,9 @@ with col1:
             st.session_state["summary_text"][month_name] = response.choices[0].message.content.strip()
 
         if month_name in st.session_state["summary_text"]:
-            st.markdown(st.session_state["summary_text"][month_name])
-
+            summary_box.markdown(st.session_state["summary_text"][month_name])
+        else:
+            summary_box.markdown("_No summary generated yet for this month._")
 
 with col2:
     c2 = st.container(border=True, height=420)
