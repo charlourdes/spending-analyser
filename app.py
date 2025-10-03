@@ -17,13 +17,13 @@ def generate_dummy_data(num=None, month=9):
     # Variable number of transactions
     if num is None:
         if month == 8:
-            num = np.random.randint(42, 50)  # busier August
+            num = np.random.randint(42, 50)  
         elif month == 9:
-            num = np.random.randint(30, 36)  # quieter September
+            num = np.random.randint(30, 36)  
         else:
             num = np.random.randint(35, 41)
 
-    # Base merchants
+    # merchants and categories
     merchant_category_map = {
         'Tesco': 'Groceries',
         'M&S': 'Groceries',
@@ -41,7 +41,7 @@ def generate_dummy_data(num=None, month=9):
         'Holland & Barrett': 'Health',
     }
 
-    # Extra holiday-style merchants for August
+    # Extra holiday-style merchants for August to make it realistic 
     if month == 8:
         merchant_category_map.update({
             'Swimming Water Park': 'Entertainment',
@@ -55,13 +55,13 @@ def generate_dummy_data(num=None, month=9):
 
     # Adjusted weights (less Shopping & Restaurants)
     merchant_weights = {
-        'Tesco': 0.15, 'M&S': 0.10,   # groceries (unchanged)
-        'Amazon': 0.06, 'Costco': 0.05, 'H&M': 0.04, 'IKEA': 0.02,  # shopping reduced
-        'Starbucks': 0.06, 'Pizza Hut': 0.05, 'Beachside Café': 0.04 if month == 8 else 0,  # restaurants reduced
-        'Uber': 0.06, 'Shell': 0.05,                                 # transport steady
-        'Vue Cinema': 0.05, 'Arcade': 0.04,                          # entertainment boosted
-        'Boots': 0.02, 'Holland & Barrett': 0.02,                    # health
-        # Seasonal additions (boost travel/entertainment in August)
+        'Tesco': 0.15, 'M&S': 0.10,   
+        'Amazon': 0.06, 'Costco': 0.05, 'H&M': 0.04, 'IKEA': 0.02,  
+        'Starbucks': 0.06, 'Pizza Hut': 0.05, 'Beachside Café': 0.04 if month == 8 else 0,  
+        'Uber': 0.06, 'Shell': 0.05,                                 
+        'Vue Cinema': 0.05, 'Arcade': 0.04,                          
+        'Boots': 0.02, 'Holland & Barrett': 0.02,                   
+        # Seasonal additions (to make august more holiday focused)
         'Swimming Water Park': 0.05 if month == 8 else 0,
         'Airbnb': 0.05 if month == 8 else 0,
         'EasyJet Flights': 0.04 if month == 8 else 0,
@@ -83,11 +83,11 @@ def generate_dummy_data(num=None, month=9):
         if category == 'Groceries':
             amount = np.random.uniform(15, 55)
         elif category == 'Restaurants':
-            amount = np.random.uniform(12, 35)  # reduced
+            amount = np.random.uniform(12, 35)  
         elif category == 'Transport':
             amount = np.random.uniform(5, 25)
         elif category == 'Shopping':
-            amount = np.random.uniform(15, 70)  # reduced cap
+            amount = np.random.uniform(15, 70)  
         elif category == 'Clothing':
             amount = np.random.uniform(20, 80)
         elif category == 'Entertainment':
@@ -95,15 +95,15 @@ def generate_dummy_data(num=None, month=9):
         elif category == 'Health':
             amount = np.random.uniform(8, 40)
         elif category == 'Travel':
-            amount = np.random.uniform(80, 250)  # bigger holidays
+            amount = np.random.uniform(80, 250)  
         else:
             amount = np.random.uniform(5, 50)
 
         # Month-based adjustments
         if month == 8 and category in ["Restaurants", "Entertainment", "Travel"]:
-            amount *= 1  # holiday boost
+            amount *= 1  
         if month == 9:
-            amount *= 0.9  # leaner September
+            amount *= 0.9  
 
         # Weekend boost for leisure
         day_offset = np.random.randint(0, 30)
@@ -123,7 +123,7 @@ def generate_dummy_data(num=None, month=9):
             "Merchant": merchant
         })
 
-    # Fixed monthly costs
+    # Fixed monthly costs on the 2nd of each month for realism
     rows.append({
         "Date": start + timedelta(days=1, hours=9),
         "Category": "Rent & Utilities",
@@ -272,7 +272,7 @@ with col1:
 
             prompt = (
                 f"You are a friendly financial assistant. Write a short, conversational summary of the customer's {month_name} spending. "
-                "Highlight the biggest categories, point out any patterns, "
+                "Highlight the biggest categories, point out any patterns, " "look for changes in spending based on week or weekend" "look for themes of purchases"
                 "and mention a few specific merchants by name. Do not repeat the numbers exactly — explain insights naturally in 2–3 sentences.\n\n"
                 f"Customer spending data:\n{input_text}"
             )
