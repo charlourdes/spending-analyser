@@ -8,7 +8,7 @@ import plotly.express as px
 st.set_page_config(page_title="AI Spending Analyser", page_icon="💳", layout="wide")
 
 # -------------------------
-# Data generator (holiday merchants for August)
+# Data generator 
 # -------------------------
 @st.cache_data
 def generate_dummy_data(num=None, month=9):
@@ -53,7 +53,7 @@ def generate_dummy_data(num=None, month=9):
 
     merchants = list(merchant_category_map.keys())
 
-    # Adjusted weights (less Shopping & Restaurants)
+    # Adjusted weights to reflect average spending patterns
     merchant_weights = {
         'Tesco': 0.15, 'M&S': 0.10,   
         'Amazon': 0.06, 'Costco': 0.05, 'H&M': 0.04, 'IKEA': 0.02,  
@@ -105,7 +105,7 @@ def generate_dummy_data(num=None, month=9):
         if month == 9:
             amount *= 0.9  
 
-        # Weekend boost for leisure
+        
         day_offset = np.random.randint(0, 30)
         day = start + timedelta(days=day_offset)
         if category in ['Restaurants', 'Entertainment'] and day.weekday() >= 5:
