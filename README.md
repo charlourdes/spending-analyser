@@ -13,6 +13,11 @@ Tech stack:
 Python, Streamlit, Plotly, Pandas and OpenAI
 
 
+Some of my thinking:
+
+1. I made the decision for a button to be present within the AI natural language summary card as users have the option to do this. A primary call to action will hopefully lead users to pressing this button and unlocking great AI insight. I could have made the AI summary load in automatically however this could use many credits if a user were to load a page many times (unless you put a stop on one its loaded it stops) however as i was testing this myself i did not want to run out of credits ahah ! 
+
+
 
 Deeper dive into the requirments and what I have delivered:
 
