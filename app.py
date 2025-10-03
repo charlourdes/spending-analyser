@@ -8,69 +8,163 @@ import plotly.express as px
 st.set_page_config(page_title="AI Spending Analyser", page_icon="💳", layout="wide")
 
 # -------------------------
-# Data generator
+# Data generator (holiday merchants for August)
 # -------------------------
 @st.cache_data
-def generate_dummy_data(num=50, month=9):
-    np.random.seed(40 + month)  # Different random seed per month
+def generate_dummy_data(num=None, month=9):
+    np.random.seed(40 + month)
 
+    # Variable number of transactions
+    if num is None:
+        if month == 8:
+            num = np.random.randint(42, 50)  # busier August
+        elif month == 9:
+            num = np.random.randint(30, 36)  # quieter September
+        else:
+            num = np.random.randint(35, 41)
+
+    # Base merchants
     merchant_category_map = {
-        'Tesco': 'Groceries', 'Starbucks': 'Restaurants', 'Uber': 'Transport',
-        'Vue Cinema': 'Entertainment', 'H&M': 'Clothing', 'Shell': 'Transport',
-        'M&S': 'Groceries', 'Costco': 'Shopping', 'Amazon': 'Shopping',
-        'Pizza Hut': 'Restaurants', 'Arcade': 'Entertainment', 'IKEA': 'Shopping',
-        'Boots': 'Health', 'Holland & Barrett': 'Health',
+        'Tesco': 'Groceries',
+        'M&S': 'Groceries',
+        'Amazon': 'Shopping',
+        'Costco': 'Shopping',
+        'H&M': 'Clothing',
+        'IKEA': 'Shopping',
+        'Starbucks': 'Restaurants',
+        'Pizza Hut': 'Restaurants',
+        'Uber': 'Transport',
+        'Shell': 'Transport',
+        'Vue Cinema': 'Entertainment',
+        'Arcade': 'Entertainment',
+        'Boots': 'Health',
+        'Holland & Barrett': 'Health',
     }
+
+    # Extra holiday-style merchants for August
+    if month == 8:
+        merchant_category_map.update({
+            'Swimming Water Park': 'Entertainment',
+            'Airbnb': 'Travel',
+            'EasyJet Flights': 'Travel',
+            'Local Museum': 'Entertainment',
+            'Beachside Café': 'Restaurants'
+        })
+
     merchants = list(merchant_category_map.keys())
+
+    # Adjusted weights (less Shopping & Restaurants)
+    merchant_weights = {
+        'Tesco': 0.15, 'M&S': 0.10,   # groceries (unchanged)
+        'Amazon': 0.06, 'Costco': 0.05, 'H&M': 0.04, 'IKEA': 0.02,  # shopping reduced
+        'Starbucks': 0.06, 'Pizza Hut': 0.05, 'Beachside Café': 0.04 if month == 8 else 0,  # restaurants reduced
+        'Uber': 0.06, 'Shell': 0.05,                                 # transport steady
+        'Vue Cinema': 0.05, 'Arcade': 0.04,                          # entertainment boosted
+        'Boots': 0.02, 'Holland & Barrett': 0.02,                    # health
+        # Seasonal additions (boost travel/entertainment in August)
+        'Swimming Water Park': 0.05 if month == 8 else 0,
+        'Airbnb': 0.05 if month == 8 else 0,
+        'EasyJet Flights': 0.04 if month == 8 else 0,
+        'Local Museum': 0.03 if month == 8 else 0,
+    }
+
+    weights = np.array([merchant_weights.get(m, 0) for m in merchants])
+    weights /= weights.sum()
+
     year = datetime.today().year
     start = datetime(year, month, 1)
 
     rows = []
     for _ in range(num):
-        merchant = np.random.choice(merchants)
+        merchant = np.random.choice(merchants, p=weights)
         category = merchant_category_map[merchant]
 
-        if month == 8:
-            amount = np.round(np.random.uniform(10, 75), 2)
+        # Spending ranges by category
+        if category == 'Groceries':
+            amount = np.random.uniform(15, 55)
+        elif category == 'Restaurants':
+            amount = np.random.uniform(12, 35)  # reduced
+        elif category == 'Transport':
+            amount = np.random.uniform(5, 25)
+        elif category == 'Shopping':
+            amount = np.random.uniform(15, 70)  # reduced cap
+        elif category == 'Clothing':
+            amount = np.random.uniform(20, 80)
+        elif category == 'Entertainment':
+            amount = np.random.uniform(15, 65)
+        elif category == 'Health':
+            amount = np.random.uniform(8, 40)
+        elif category == 'Travel':
+            amount = np.random.uniform(80, 250)  # bigger holidays
         else:
-            amount = np.round(np.random.uniform(5, 54), 2)
+            amount = np.random.uniform(5, 50)
 
-        day = start + timedelta(days=np.random.randint(0, 30))
+        # Month-based adjustments
+        if month == 8 and category in ["Restaurants", "Entertainment", "Travel"]:
+            amount *= 1  # holiday boost
+        if month == 9:
+            amount *= 0.9  # leaner September
+
+        # Weekend boost for leisure
+        day_offset = np.random.randint(0, 30)
+        day = start + timedelta(days=day_offset)
+        if category in ['Restaurants', 'Entertainment'] and day.weekday() >= 5:
+            amount *= 1.2
+
+        # Time of day
         hour = np.random.randint(8, 22)
         minute = np.random.randint(0, 60)
         dt = day + timedelta(hours=hour, minutes=minute)
-        rows.append({"Date": dt, "Category": category, "Amount": amount, "Merchant": merchant})
+
+        rows.append({
+            "Date": dt,
+            "Category": category,
+            "Amount": round(amount, 2),
+            "Merchant": merchant
+        })
+
+    # Fixed monthly costs
+    rows.append({
+        "Date": start + timedelta(days=1, hours=9),
+        "Category": "Rent & Utilities",
+        "Amount": 600.00,
+        "Merchant": "Monthly Rent"
+    })
+    rows.append({
+        "Date": start + timedelta(days=1, hours=10),
+        "Category": "Rent & Utilities",
+        "Amount": 30.00,
+        "Merchant": "Phone Bill"
+    })
+
     return pd.DataFrame(rows)
 
-
 # -------------------------
-# Title first
+# Title
 # -------------------------
 st.title("Your Spending dashboard")
 
 # -------------------------
-# Month selector BELOW title (restricted width)
+# Month selector
 # -------------------------
-col_month, _ = st.columns([1, 3])  # dropdown takes 1/4 page width
+col_month, _ = st.columns([1, 3])
 with col_month:
     month_choice = st.selectbox("Select Month", ["September", "August"], index=0, label_visibility="collapsed")
 
 # -------------------------
-# Apply month selection
+# Apply selection
 # -------------------------
 if month_choice == "September":
-    df = generate_dummy_data(50, month=9).sort_values("Date")
+    df = generate_dummy_data(month=9).sort_values("Date")
     month_name = "September"
 else:
-    df = generate_dummy_data(50, month=8).sort_values("Date")
+    df = generate_dummy_data(month=8).sort_values("Date")
     month_name = "August"
 
-# ✅ Dynamic subtitle update
 st.subheader(f"{month_name} Spending analysis")
 
-
 # -------------------------
-# Copies for processing + display
+# Copies for processing
 # -------------------------
 df_numeric = df.copy()
 df_display = df.copy()
@@ -78,10 +172,10 @@ df_display["Date"] = pd.to_datetime(df_display["Date"]).dt.strftime("%d/%m/%Y %H
 df_display["Amount"] = df_display["Amount"].apply(lambda x: f"£{x:.2f}")
 
 # -------------------------
-# Calculate spending deltas
+# Compare months
 # -------------------------
-df_aug = generate_dummy_data(50, month=8)
-df_sep = generate_dummy_data(50, month=9)
+df_aug = generate_dummy_data(month=8)
+df_sep = generate_dummy_data(month=9)
 
 aug_total_spending = df_aug["Amount"].sum()
 sep_total_spending = df_sep["Amount"].sum()
@@ -102,7 +196,7 @@ else:
     delta_color = None
 
 # -------------------------
-# KPI Cards (Top row)
+# KPI cards
 # -------------------------
 kpi1, kpi2, kpi3 = st.columns(3)
 
@@ -111,7 +205,6 @@ with kpi1:
     with k1:
         if month_choice == "September":
             col_left, col_right = st.columns([3, 1])
-
             with col_left:
                 st.metric(
                     f"Total Spending ({month_name})",
@@ -119,18 +212,13 @@ with kpi1:
                     delta=f"{percent_change:.1f}%",
                     delta_color=delta_color
                 )
-
             with col_right:
                 if percent_change < 0:
                     st.caption(":material/trending_down: Spending down from last month")
                 elif percent_change > 0:
                     st.caption(":material/trending_up: Spending up from last month")
-
         else:
-            st.metric(
-                f"Total Spending ({month_name})",
-                f"£{total_spending:.2f}"
-            )
+            st.metric(f"Total Spending ({month_name})", f"£{total_spending:.2f}")
 
 with kpi2:
     k2 = st.container(border=True, height=120)
@@ -143,7 +231,7 @@ with kpi3:
         st.metric("Average Transaction", f"£{avg_transaction:.2f}")
 
 # -------------------------
-# Create Plotly figures
+# Charts
 # -------------------------
 cat_summary = df_numeric.groupby("Category")["Amount"].sum().reset_index()
 fig_cat = px.bar(cat_summary, x="Category", y="Amount", text_auto=".2f", color="Category")
@@ -157,7 +245,7 @@ fig_time.update_layout(xaxis_title=f"Day in {month_name}", yaxis_title="Daily Sp
                        margin=dict(t=10, l=40, r=10, b=40))
 
 # -------------------------
-# Layout (2x2 grid, swapped order)
+# Layout
 # -------------------------
 col1, col2 = st.columns(2)
 
