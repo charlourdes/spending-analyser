@@ -259,32 +259,35 @@ with col1:
 
         summary_box = st.empty()
 
-        if st.button(f"Generate Spending Summary", type="primary",key=f"gen_summary_{month_name}"):
-            cat_totals = df_numeric.groupby("Category")["Amount"].sum().sort_values(ascending=False)
-            top_merchants = df_numeric.groupby("Merchant")["Amount"].sum().sort_values(ascending=False).head(3)
+        if st.button(f"Generate Spending Summary", type="primary", key=f"gen_summary_{month_name}"):
+            with st.spinner("🤖 Analysing your spending… please wait"):
+                cat_totals = df_numeric.groupby("Category")["Amount"].sum().sort_values(ascending=False)
+                top_merchants = df_numeric.groupby("Merchant")["Amount"].sum().sort_values(ascending=False).head(3)
 
-            input_text = (
-                f"Over the past {len(df_numeric)} transactions, "
-                f"the highest spending was on {cat_totals.index[0]} (£{cat_totals.iloc[0]:.2f}). "
-                f"Other major areas include {cat_totals.index[1]} and {cat_totals.index[2]}. "
-                f"The most frequent merchants were {', '.join(top_merchants.index)}."
-            )
+                input_text = (
+                    f"Over the past {len(df_numeric)} transactions, "
+                    f"the highest spending was on {cat_totals.index[0]} (£{cat_totals.iloc[0]:.2f}). "
+                    f"Other major areas include {cat_totals.index[1]} and {cat_totals.index[2]}. "
+                    f"The most frequent merchants were {', '.join(top_merchants.index)}."
+                )
 
-            prompt = (
-                f"You are a friendly financial assistant. Write a short, conversational summary of the customer's {month_name} spending. "
-                "Highlight the biggest categories, point out any patterns, " "look for changes in spending based on week or weekend" "look for themes of purchases"
-                "and mention a few specific merchants by name. Do not repeat the numbers exactly — explain insights naturally in 2–3 sentences.\n\n"
-                f"Customer spending data:\n{input_text}"
-            )
+                prompt = (
+                    f"You are a friendly financial assistant. Write a short, conversational summary of the customer's {month_name} spending. "
+                    "Highlight the biggest categories, point out any patterns, "
+                    "look for changes in spending based on week or weekend, "
+                    "look for themes of purchases, "
+                    "and mention a few specific merchants by name. Do not repeat the numbers exactly — explain insights naturally in 2–3 sentences.\n\n"
+                    f"Customer spending data:\n{input_text}"
+                )
 
-            response = OpenAI(api_key=st.secrets["openai_api_key"]).chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "You are a helpful financial assistant."},
-                    {"role": "user", "content": prompt}
-                ]
-            )
-            st.session_state["summary_text"][month_name] = response.choices[0].message.content.strip()
+                response = OpenAI(api_key=st.secrets["openai_api_key"]).chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful financial assistant."},
+                        {"role": "user", "content": prompt}
+                    ]
+                )
+                st.session_state["summary_text"][month_name] = response.choices[0].message.content.strip()
 
         if month_name in st.session_state["summary_text"]:
             summary_box.markdown(st.session_state["summary_text"][month_name])
