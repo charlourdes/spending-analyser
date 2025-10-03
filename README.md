@@ -31,4 +31,4 @@ including - Biggest spending catagories, frequent merchants and notable patterns
 
 I have built this task with Streamlit to bring a simply web interface and for quick prototyping and deployment. 
 
-Public link 
+Public link hosted on streamlit cloud - https://charlourdes-spending-analyser-app-ps2t2f.streamlit.app 
