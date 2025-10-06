@@ -259,7 +259,7 @@ with col1:
 
         summary_box = st.empty()
 
-        if st.button(f"Generate Spending Summary", type="primary", key=f"gen_summary_{month_name}"):
+        if st.button(f"Generate AISpending Summary", type="primary", key=f"gen_summary_{month_name}"):
             with st.spinner("🤖 Analysing your spending… please wait"):
                 cat_totals = df_numeric.groupby("Category")["Amount"].sum().sort_values(ascending=False)
                 top_merchants = df_numeric.groupby("Merchant")["Amount"].sum().sort_values(ascending=False).head(3)
