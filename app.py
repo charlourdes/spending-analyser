@@ -228,7 +228,7 @@ with kpi2:
 with kpi3:
     k3 = st.container(border=True, height=120)
     with k3:
-        st.metric("Average Transaction", f"£{avg_transaction:.2f}")
+        st.metric("Average Transaction Cost", f"£{avg_transaction:.2f}")
 
 # -------------------------
 # Charts
