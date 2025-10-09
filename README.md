@@ -28,7 +28,7 @@ I believe that all these visualsations would be valuable to end customers as the
 
 
 3. ### AI summarisation 
- I used OpenAI model API in order to generate a natural language summary of the customers spending, instead of raw numbers. My prompt design aimed for a human like and conversational tone to create an intuitive insight which  highlights patterns and catagories of spending. I also designed the prompt to give a  budgeting/financial tip to develop the analysis further. 
+ I used OpenAI model API in order to generate a natural language summary of the customers spending. My prompt design aimed for a human like and conversational tone to create an intuitive insight which  highlights patterns and catagories of spending. I also designed the prompt to give a budgeting/financial tip to develop the analysis further. This has turned complex numbers into helpful text. 
 
 I made the decision to have the AI summary only load after the user presses the primary CTA button.
 
@@ -37,12 +37,13 @@ This:
 - Gives users control over when to use the feature
 - Prevents unnecessary credit use if a user reloads the app repeatedly
 
-I was very close to having it auto-generate on load as I think users would feel the benefit from having this insight readily available, however I held off to avoid running out of credits while I was testing and to ensure that you can see the AI summary in action before I run out 😅 ! 
+I was very close to having it auto-generate on load as I think users would feel the benefit from having this insight readily available, however I ultimately held off to avoid running out of credits while I was testing and to ensure that you can see the AI summary in action before I run out 😅 ! 
 
 
 
 4. ### Web interface 
 I used the  Streamlit as it allowed me to build a interactive dashboard prototype and:
+
 - Supported rapid prototyping with python 
 - intergrated easily with Pandas, Plotly and the OpenAI API
 - It let me focus on functionality, iteration and deploying to the Web
