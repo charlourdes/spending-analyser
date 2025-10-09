@@ -161,7 +161,7 @@ else:
     df = generate_dummy_data(month=8).sort_values("Date")
     month_name = "August"
 
-st.subheader(f"{month_name} Spending analysis")
+st.subheader(f"{month_name} Spending Analysis")
 
 # -------------------------
 # Copies for processing
