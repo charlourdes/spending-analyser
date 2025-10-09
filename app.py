@@ -142,7 +142,7 @@ def generate_dummy_data(num=None, month=9):
 # -------------------------
 # Title
 # -------------------------
-st.title("Your Spending dashboard")
+st.title("Your Spending Dashboard")
 
 # -------------------------
 # Month selector
