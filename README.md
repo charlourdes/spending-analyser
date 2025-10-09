@@ -121,8 +121,7 @@ you will have to create a `.streamlit/secrets.toml` file in you project and add 
 use this line below and add your key. 
 
 
-openai_api_key = "your-openAI-key-should-go-here"
-
+`openai_api_key = "your-openAI-key-should-go-here"`
 
 5. ### Run the streamlit app
 
