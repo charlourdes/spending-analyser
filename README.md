@@ -1,7 +1,7 @@
 
 # Spending Analyser 
 
-Hello, thank you for considering my application, I  have enjoyed doing this task and hope you like what I have come up with!
+Hello, thank you for considering my application, I have enjoyed doing this task and hope you like what I have come up with!
 
 I chose the Spending Analyser task. 
 
@@ -45,7 +45,7 @@ I was very close to having it auto-generate on load as I think users would feel 
 I used the  Streamlit as it allowed me to build a interactive dashboard prototype and:
 
 - Supported rapid prototyping with python 
-- intergrated easily with Pandas, Plotly and the OpenAI API
+- Intergrated easily with Pandas, Plotly and the OpenAI API
 - It let me focus on functionality, iteration and deploying to the Web
 
 Streamlit UI components were perfect for this task with all the cards/metrics I wanted to include. The result is a clean, modern dashboard with interactive and intuitive UI components. 
@@ -74,7 +74,7 @@ https://github.com/charlourdes/spending-analyser
 
 OR
 
-if you have Git installed 
+If you have Git installed 
 
 ```bash
 git clone https://github.com/charlourdes/spending-analyser.git
@@ -116,9 +116,9 @@ pip install -r requirements.txt
 
 
 4. ### Add your OpenAI key 
-you will have to create a `.streamlit/secrets.toml` file in you project and add your OpenAI key. 
+You will have to create a `.streamlit/secrets.toml` file in you project and add your OpenAI key. 
 
-use this line below and add your key. 
+Use this line below and add your key. 
 
 
 ```toml
