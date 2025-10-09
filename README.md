@@ -4,10 +4,8 @@
 Hello, and thank you for considering my application. I have really enjoyed working on this task and hope you like what I have come up with!
 
 
-I chose the Spending Analyser task. 
 
-
-## The requirements/features I have included and some of my thinking behind them:
+## How I have met the requirements and how this app works
 
 
 1. ### Synthetic but realistic transaction data 
@@ -31,9 +29,7 @@ I believe that all these visualisations would be valuable to end customers as th
 
 
 3. ### AI summarisation 
- I used the OpenAI model API in order to generate a natural language summary of the customer's spending. My prompt design aimed for a human-like and conversational tone to create an intuitive summary that highlights patterns and categories of spending. I also designed the prompt to offer a budgeting/financial tip to develop the analysis further. This has turned complex numbers into helpful text. 
-
-I made the decision to have the AI summary only load after the user presses the primary CTA button.
+ I used the OpenAI model API in order to generate a natural language summary of the customer's spending. My prompt design aimed for a human-like tone to create an intuitive summary that highlights patterns and categories of spending. I also designed the prompt to offer a budgeting/financial tip to develop the analysis further. I made the decision to have the AI summary only load after the user presses the primary CTA button.
 
 This:
 
@@ -45,13 +41,13 @@ I strongly considered having it auto-generate on load, as I think users would be
 
 
 4. ### Web interface 
-I used Streamlit as it allowed me to build an interactive dashboard prototype and:
+I used Streamlit as it allowed me to build an interactive modern dashboard prototype it also:
 
 - Supported rapid prototyping with Python 
 - Integrated easily with Pandas, Plotly and the OpenAI API
 - It let me focus on functionality, iteration and deploying to the Web
 
-Streamlit UI components were perfect for this task as it supported all the card metrics I wanted to include. The result is a clean, modern dashboard with interactive and intuitive UI components. 
+Streamlit UI components were perfect as it supported all the card metrics I wanted to include. 
 
 
 
