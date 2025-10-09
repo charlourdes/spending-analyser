@@ -275,7 +275,7 @@ with col1:
                     f"You are a friendly financial assistant. Write a short, conversational summary of the customer's {month_name} spending. "
                     "Highlight the biggest categories, point out any patterns, "
                     "look for changes in spending based on week or weekend, " "Based on this data, suggest one practical personalised budgeting tip or financial goals."
-                    "look for themes of purchases, "
+                    "look for themes of purchases, and a small comparison to last month if available, "
                     "and mention a few specific merchants by name. Do not repeat the numbers exactly — explain insights naturally in 3-4 sentences.\n\n"
                     f"Customer spending data:\n{input_text}"
                 )

@@ -12,6 +12,8 @@ I chose the Spending Analyser task.
 1. ### Synthetic but realistic transaction data 
  This included data on merchants, spending catagories, amounts in £ and times of purchase. Also set with a realistic budget. 
 
+ I created data for August and September as It allowed me to replicate realistic themes that may happen month to month. I was able to do some comparing and contrasting between each months data. 
+
 
 
 2. ### Statistics & Visualisations 
