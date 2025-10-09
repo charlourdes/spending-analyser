@@ -110,20 +110,25 @@ python -m venv venv
 
 3. ### Install dependecies 
 
-`pip install -r requirements.txt`
+```bash
+pip install -r requirements.txt
+```
 
 
 4. ### Add your OpenAI key 
-you will have to create a .streamlit/secrets.toml file in you project and add your OpenAI key. 
+you will have to create a `.streamlit/secrets.toml` file in you project and add your OpenAI key. 
 
 use this line below and add your key. 
 
-`openai_api_key = "your-openAI-key-should-go-here"`
+
+openai_api_key = "your-openAI-key-should-go-here"
 
 
 5. ### Run the streamlit app
 
-`streamlit run app.py`
+```bash
+streamlit run app.py
+```
 
 The browser should open like this automatically OR visit it manually
 http://localhost:8501
