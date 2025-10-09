@@ -311,5 +311,5 @@ with col3:
 with col4:
     c4 = st.container(border=True, height=420)
     with c4:
-        st.subheader(f":material/calendar_month: Daily {month_name} Spending")
+        st.subheader(f":material/calendar_month: Daily Spending {month_name}")
         st.plotly_chart(fig_time, use_container_width=True)
