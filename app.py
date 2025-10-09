@@ -276,7 +276,7 @@ with col1:
                     "Highlight the biggest categories, point out any patterns, "
                     "look for changes in spending based on week or weekend, " "Based on this data, suggest one practical personalised budgeting tip or financial goals."
                     "look for themes of purchases, "
-                    "and mention a few specific merchants by name. Do not repeat the numbers exactly — explain insights naturally in 2–3 sentences.\n\n"
+                    "and mention a few specific merchants by name. Do not repeat the numbers exactly — explain insights naturally in 3-4 sentences.\n\n"
                     f"Customer spending data:\n{input_text}"
                 )
 
