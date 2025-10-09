@@ -274,7 +274,7 @@ with col1:
                 prompt = (
                     f"You are a friendly financial assistant. Write a short, conversational summary of the customer's {month_name} spending. "
                     "Highlight the biggest categories, point out any patterns, "
-                    "look for changes in spending based on week or weekend, "
+                    "look for changes in spending based on week or weekend, " "Based on this data, suggest personalised budgeting tips or financial goals."
                     "look for themes of purchases, "
                     "and mention a few specific merchants by name. Do not repeat the numbers exactly — explain insights naturally in 2–3 sentences.\n\n"
                     f"Customer spending data:\n{input_text}"
