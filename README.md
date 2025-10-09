@@ -9,12 +9,12 @@ I chose the Spending Analyser task.
 ## The requirments/features I have included and some of my thinking behind them:
 
 
-1. Synthetic but realistic debit card transaction data 
+1. ### Synthetic but realistic debit card transaction data 
  This included data on merchants, spending catagories, amounts in £ and times of purchase. Also set with a realistic budget. 
 
 
 
-2. Statistics & Visualisations 
+2. ### Statistics & Visualisations 
 I added two interactive Plotly visualisations
 - A bar chart showing spending by catagory 
 - A line chart showing spending over the month 
@@ -26,7 +26,7 @@ Aditionally I included:
 
 
 
-3. AI summarisation 
+3. ### AI summarisation 
  I used OpenAI model API in order to generate a natural language summary of the customers spending, instead of raw numbers. My prompt design aimed for a human like and conversational tone to create an intuitive insight which  highlights patterns and catagories of spending. I also designed the prompt to give a  budgeting/financial tip to develop the analysis further. 
 
 I made the decision to have the AI summary only load after the user presses the primary CTA button.
@@ -40,7 +40,7 @@ I was very close to having it auto-generate on load as I think users would feel 
 
 
 
-4. Web interface 
+4. ### Web interface 
 I used the  Streamlit as it allowed me to build a interactive dashboard prototype and:
 - Supported rapid prototyping with python 
 - intergrated easily with Pandas, Plotly and the OpenAI API
