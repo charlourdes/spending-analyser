@@ -33,8 +33,8 @@ I made the decision to have the AI summary only load after the user presses the 
 
 This:
 
--Gives users control over when to use the feature
--Prevents unnecessary credit use if a user reloads the app repeatedly
+- Gives users control over when to use the feature
+- Prevents unnecessary credit use if a user reloads the app repeatedly
 
 I was very close to having it auto-generate on load as I think users would feel the benefit from having this insight readily available, however I held off to avoid running out of credits while I was testing and to ensure that you can see the AI summary in action before I run out 😅 ! 
 
