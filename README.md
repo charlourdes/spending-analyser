@@ -6,7 +6,7 @@ Hello, thank you for considering my application, I  have enjoyed doing this task
 I chose the Spending Analyser task. 
 
 
-## The requirments/features I have included and some of my thinking behind them:
+## The requirements/features I have included and some of my thinking behind them:
 
 
 1. ### Synthetic but realistic debit card transaction data 
