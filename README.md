@@ -9,13 +9,13 @@ I chose the Spending Analyser task.
 ## The requirements/features I have included and some of my thinking behind them:
 
 
-1. ### Synthetic but realistic debit card transaction data 
+1. ### Synthetic but realistic transaction data 
  This included data on merchants, spending catagories, amounts in £ and times of purchase. Also set with a realistic budget. 
 
 
 
 2. ### Statistics & Visualisations 
-I added two interactive Plotly visualisations
+I added two interactive Plotly visualisations 
 - A bar chart showing spending by catagory 
 - A line chart showing spending over the month 
 
@@ -24,6 +24,7 @@ Aditionally I included:
 - A table list view of all transaction data 
 - Three KPI cards showing: total spending, total transactions and avarage transaction price to summarise spending behaviour at a glance
 
+I believe that all these visualsations would be valuable to end customers as they aggregate complex data intio insights. 
 
 
 3. ### AI summarisation 
