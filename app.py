@@ -297,7 +297,7 @@ with col1:
 with col2:
     c2 = st.container(border=True, height=420)
     with c2:
-        st.subheader(f":material/receipt_long: {month_name} Transactions")
+        st.subheader(f":material/receipt_long: Your transactions in {month_name}")
         st.dataframe(df_display, use_container_width=True, height=300)
 
 col3, col4 = st.columns(2)
